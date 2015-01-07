@@ -78,7 +78,7 @@ LedFeedBcak InsertLedSendIter(std::vector<LedSend> *ledIter,LedSend ledSend,bool
 	strftime( tmp, sizeof(tmp), "%X",localtime(&t)); 
 	//如果大于系统时间 为真
 	//这里一定要反着使用，可以解决一分钟内仍然审核通过的逻辑错误
-	if (!TimeCompere(ledSend.playTime.delayTime,strcpy(timeAddTemp,TimeTarns(tmp))));
+	if (!TimeCompere(ledSend.playTime.delayTime,strcpy(timeAddTemp,TimeAddDelay(strcpy(timeAddTemp,TimeTarns(tmp)),2))));
 	else
 	{
 		//和系统时间冲突

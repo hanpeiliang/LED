@@ -131,6 +131,7 @@ BOOL CLEDMDlg::OnInitDialog()
 	//开启新线程
 	_beginthread(SocketLedPlayThread,0,NULL);
 
+	//ModifyStyleEx(WS_EX_TOOLWINDOW, WS_EX_APPWINDOW);
 	ModifyStyleEx(WS_EX_APPWINDOW,WS_EX_TOOLWINDOW);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -303,11 +304,13 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 			//审核信息入队
 			TRACE("----》接收\n");
 			feedBack.push_back(InsertLedSendIter(ledIter,ledSend));
+			TRACE("****反馈入队\n");
 			if (feedBack.at(0).Statue == TIME_CONFLICT_SYSTEM || feedBack.at(0).Statue == TIME_CONFLICT_OTHER)
 			{
 				TRACE("****时间冲突####结束####\n");
 				SendFeedBackToAPP(sockConn,feedBack);
 				feedBack.erase(feedBack.begin());
+				TRACE("****反馈出队\n");
 			}
 			else
 			{
@@ -366,6 +369,27 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 				}
 			}
 			//KillTimer(2);
+			//每天00:00自动清空所有
+			if (TimeEqual(tmp,"0000"))
+			{
+				//返回信息迭代器初始化
+				feedBack.empty();
+				//播放时长数组初始化
+				for (int i = 0;i < LED_NUM;++i)
+				{
+					timeCount[i] = -1;
+				}
+				//播放信息迭代器数组初始化
+				for (int i = 0;i < LED_NUM;++i)
+				{
+					ledIter[i].empty();
+				}
+				//审核排队迭代器初始化
+				ledCheckedIter.empty();
+				//删除C:\\FTP上传\\*.png保存的图片
+				system("del C:\\FTP上传\\*.png /a /s /f /q");
+
+			}
 		}
 		break;
 	case 3://1s
@@ -432,19 +456,22 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 				if (feedBack.at(0).Statue == CHECKED_SUCCEED)
 				{
 					//停止计数
-					TRACE("****审核通过\n");
+					TRACE("#######通过\n");
 					KillTimer(4);
 					SendFeedBackToAPP(sockConn,feedBack);
+					TRACE("****反馈出队\n");
 					feedBack.erase(feedBack.begin());
 					//只有审核通过了才进入
 					InsertLedSendIter(ledIter,ledSendCheck,true);
+					TRACE("****播放队列入队\n");
 				}
 				else if (feedBack.at(0).Statue == CHECKED_FAILE)
 				{
 					//停止计数
-					TRACE("****审核未通过\n");
+					TRACE("#######未通过\n");
 					KillTimer(4);
 					SendFeedBackToAPP(sockConn,feedBack);
+					TRACE("****反馈出队\n");
 					feedBack.erase(feedBack.begin());
 				}
 				
@@ -453,10 +480,10 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 			{
 				feedBack.at(0).Statue = CHECKED_TIME_OVER; 
 
-				TRACE("****审核超时\n");
+				TRACE("#######超时\n");
 				SendFeedBackToAPP(sockConn,feedBack);	
 				feedBack.erase(feedBack.begin());
-				TRACE("****播放队列出队\n");
+				TRACE("****反馈出队\n");
 				checkedTime = CHECKED_TIME;
 				KillTimer(4);
 				ShowWindow(SW_HIDE);
@@ -472,7 +499,6 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 			//删除第一个
 			TRACE("****审核出队\n");
 			ledCheckedIter.erase(ledCheckedIter.begin());
-			TRACE("****播放队列入队\n");
 			//两分钟审核倒计时
 			SetTimer(4,1000,NULL);
 			//进入审核
