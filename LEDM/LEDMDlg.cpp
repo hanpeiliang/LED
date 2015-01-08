@@ -365,7 +365,7 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 					//SetTimer(3,1000*60,NULL);
 					//删掉队列元素
 					//ledIter[i].erase(ledIter[i].begin());
-					TRACE("****播放开始\n");
+					TRACE("****播放开始****\n");
 				}
 			}
 			//KillTimer(2);
@@ -406,8 +406,8 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 			{
 				//删掉队列元素
 				ledIter[i].erase(ledIter[i].begin());
-				TRACE("****播放完成\n");
-				TRACE("****播放队列出队\n");
+				TRACE("****播放完成****\n");
+				TRACE("====播放队列出队\n");
 				//播放完毕，回复初始值
 				timeCount[i] = -1;
 				//播放完成处理
@@ -456,19 +456,19 @@ void CLEDMDlg::OnTimer(UINT_PTR nIDEvent)
 				if (feedBack.at(0).Statue == CHECKED_SUCCEED)
 				{
 					//停止计数
-					TRACE("#######通过\n");
+					TRACE("#######通过审核\n");
 					KillTimer(4);
 					SendFeedBackToAPP(sockConn,feedBack);
 					TRACE("****反馈出队\n");
 					feedBack.erase(feedBack.begin());
 					//只有审核通过了才进入
 					InsertLedSendIter(ledIter,ledSendCheck,true);
-					TRACE("****播放队列入队\n");
+					TRACE("====播放队列入队\n");
 				}
 				else if (feedBack.at(0).Statue == CHECKED_FAILE)
 				{
 					//停止计数
-					TRACE("#######未通过\n");
+					TRACE("#######未通过审核\n");
 					KillTimer(4);
 					SendFeedBackToAPP(sockConn,feedBack);
 					TRACE("****反馈出队\n");
